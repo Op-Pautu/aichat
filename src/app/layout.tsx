@@ -35,7 +35,7 @@ export default function RootLayout({
 				>
 					<div
 						id="rootLayout"
-						className="py-4 px-16 flex flex-col min-h-screen"
+						className="py-4 px-16 flex flex-col min-h-screen "
 					>
 						<Navbar />
 						<main className="overflow-hidden flex-1">{children}</main>

@@ -11,7 +11,7 @@ const Homepage = () => {
 			<img
 				src="/orbital.png"
 				alt=""
-				className="animate-rotateOrbital absolute bottom-0 left-0 opacity-[0.05]"
+				className="animate-rotateOrbital absolute bottom-0 left-0 opacity-[0.05] z-[-1]"
 			/>
 			<div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
 				<h1 className="text-[4rem] xl:text-[7.5rem] bg-gradient-to-r from-[#217bfe] to-[#e55571] bg-clip-text text-transparent">
