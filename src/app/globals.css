@@ -92,3 +92,8 @@ a {
 		@apply bg-background text-foreground;
 	}
 }
+
+.chat-container p,
+li {
+	margin: 10px 0px;
+}
