@@ -1,10 +1,16 @@
 "use client";
 import React, { ChangeEvent, Dispatch, SetStateAction, useRef } from "react";
-import { ImageKitProvider, IKImage, IKUpload } from "imagekitio-next";
+import {
+	ImageKitProvider,
+	IKImage,
+	IKUpload,
+	ImageKitContext,
+} from "imagekitio-next";
 import { IKUploadResponse } from "imagekitio-next/dist/types/components/IKUpload/props";
 
 const publicKey = process.env.NEXT_PUBLIC_PUBLIC_KEY;
 const urlEndpoint = process.env.NEXT_PUBLIC_URL_ENDPOINT;
+
 const authenticator = async () => {
 	try {
 		const response = await fetch("http://localhost:3000/api/upload");
@@ -30,7 +36,12 @@ const authenticator = async () => {
 
 interface UploadProps {
 	setImage: Dispatch<
-		SetStateAction<{ isLoading: boolean; error: string; dbData: {} }>
+		SetStateAction<{
+			isLoading: boolean;
+			error: string;
+			dbData: {};
+			aiData?: {};
+		}>
 	>;
 }
 
@@ -55,13 +66,34 @@ export function Upload({ setImage }: UploadProps) {
 	};
 
 	const onUploadStart = (evt: ChangeEvent<HTMLInputElement>): void => {
-		console.log("Start", evt);
-		setImage((prev) => ({
-			...prev,
-			isLoading: true,
-		}));
-	};
+		const file = evt.target.files?.[0];
 
+		if (file) {
+			// Ensure 'file' is defined
+			const reader = new FileReader();
+
+			reader.onloadend = () => {
+				if (reader.result) {
+					setImage((prev) => ({
+						...prev,
+						isLoading: true,
+						aiData: {
+							inlineData: {
+								data: (reader.result as string).split(",")[1],
+								mimeType: file.type,
+							},
+						},
+					}));
+				}
+			};
+
+			reader.readAsDataURL(file);
+			setImage((prev) => ({
+				...prev,
+				isLoading: true,
+			}));
+		}
+	};
 	return (
 		<ImageKitProvider
 			publicKey={publicKey}
@@ -79,10 +111,7 @@ export function Upload({ setImage }: UploadProps) {
 				ref={ikUploadRef}
 			/>
 			{
-				<label
-					onClick={() => ikUploadRef?.current?.click()}
-					className="rounded-[50%] bg-[#605e68] border-none p-2.5 flex items-center justify-center cursor-pointer"
-				>
+				<label onClick={() => ikUploadRef?.current?.click()}>
 					<img src="/attachment.png" alt="attachment" className="size-4" />
 				</label>
 			}

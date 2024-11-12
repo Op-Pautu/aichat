@@ -14,6 +14,7 @@ interface ImageState {
 	dbData: {
 		filePath?: string;
 	};
+	aiData?: any;
 }
 export const NewPrompt = () => {
 	const [question, setQuestion] = useState("");
@@ -27,7 +28,22 @@ export const NewPrompt = () => {
 		isLoading: false,
 		error: "",
 		dbData: {},
+		aiData: {},
 	});
+
+	const chat = model.startChat({
+		history: [
+			{
+				role: "user",
+				parts: [{ text: "Hello" }],
+			},
+			{
+				role: "model",
+				parts: [{ text: "Great to meet you. What would you like to know?" }],
+			},
+		],
+	});
+
 	useEffect(() => {
 		if (endRef.current) {
 			endRef.current.scrollIntoView({ behavior: "smooth" });
@@ -37,9 +53,25 @@ export const NewPrompt = () => {
 	const add = async (textValue: string) => {
 		setQuestion(textValue);
 
-		const result = await model.generateContent(textValue);
-		const response = result.response;
-		setAnswer(response.text());
+		const result = await chat.sendMessageStream(
+			Object.entries(image.aiData).length
+				? [image.aiData, textValue]
+				: [textValue]
+		);
+
+		let text = "";
+		for await (const chunk of result.stream) {
+			const chunkText = chunk.text();
+			console.log(chunkText);
+			text += chunkText;
+			setAnswer(text);
+		}
+		setImage({
+			isLoading: false,
+			error: "",
+			dbData: {},
+			aiData: {},
+		});
 	};
 
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -62,8 +94,9 @@ export const NewPrompt = () => {
 					urlEndpoint={urlEndpoint}
 					path={image.dbData?.filePath}
 					alt={"image"}
-					width={380}
-					transformation={[{ width: "380" }]}
+					height="300"
+					width="400"
+					transformation={[{ height: "300", width: "400" }]}
 				/>
 			)}
 			{question && <div className="p-5">{question}</div>}
